@@ -1,0 +1,1957 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <title>Negotiatron 3000</title>
+    <style>
+        /* Base reset */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            background-image: var(--bg-pattern);
+        }
+
+        :root {
+            /* Light theme */
+            --bg-color-light: #f0f2f5;
+            --text-color-light: #2c3e50;
+            --border-color-light: rgba(0, 0, 0, 0.2);
+            --tooltip-bg-light: rgba(255, 255, 255, 0.95);
+            --progress-bg-light: #e0e6ed;
+            --link-color-light: #3498db;
+            --log-border-light: rgba(255, 255, 255, 0.1);
+            --log-timestamp-light: #95a5a6;
+            --log-error-light: #e74c3c;
+            --log-warning-light: #f39c12;
+            --log-info-light: #3498db;
+            --log-debug-light: #95a5a6;
+            --log-success-light: #2ecc71;
+            --control-bg-light: rgba(255, 255, 255, 0.9);
+            --accent-color-light: #3498db;
+            --accent-glow-light: rgba(52, 152, 219, 0.5);
+            --bg-pattern-light: none;
+            --card-bg-light: rgba(255, 255, 255, 0.9);
+            --neon-glow-light: 0 0 10px rgba(52, 152, 219, 0.5);
+
+            /* Dark theme */
+            --bg-color-dark: #0a0b0e;
+            --text-color-dark: #ecf0f1;
+            --border-color-dark: rgba(255, 255, 255, 0.1);
+            --tooltip-bg-dark: rgba(20, 22, 26, 0.95);
+            --progress-bg-dark: #1e2126;
+            --link-color-dark: #3498db;
+            --log-border-dark: rgba(255, 255, 255, 0.1);
+            --log-timestamp-dark: #95a5a6;
+            --log-error-dark: #e74c3c;
+            --log-warning-dark: #f39c12;
+            --log-info-dark: #3498db;
+            --log-debug-dark: #95a5a6;
+            --log-success-dark: #2ecc71;
+            --control-bg-dark: rgba(30, 33, 38, 0.9);
+            --accent-color-dark: #3498db;
+            --accent-glow-dark: rgba(52, 152, 219, 0.5);
+            --bg-pattern-dark: radial-gradient(circle at 50% 50%, rgba(52, 152, 219, 0.1) 0%, rgba(52, 152, 219, 0) 50%);
+            --card-bg-dark: rgba(30, 33, 38, 0.9);
+            --neon-glow-dark: 0 0 20px rgba(52, 152, 219, 0.5);
+
+            /* Default theme */
+            --bg-color: var(--bg-color-light);
+            --text-color: var(--text-color-light);
+            --border-color: var(--border-color-light);
+            --tooltip-bg: var(--tooltip-bg-light);
+            --progress-bg: var(--progress-bg-light);
+            --link-color: var(--link-color-light);
+            --log-border: var(--log-border-light);
+            --log-timestamp: var(--log-timestamp-light);
+            --log-error: var(--log-error-light);
+            --log-warning: var(--log-warning-light);
+            --log-info: var(--log-info-light);
+            --log-debug: var(--log-debug-light);
+            --log-success: var(--log-success-light);
+            --control-bg: var(--control-bg-light);
+            --accent-color: var(--accent-color-light);
+            --accent-glow: var(--accent-glow-light);
+            --bg-pattern: var(--bg-pattern-light);
+            --card-bg: var(--card-bg-light);
+            --neon-glow: var(--neon-glow-light);
+        }
+
+        [data-theme="dark"] {
+            --bg-color: var(--bg-color-dark);
+            --text-color: var(--text-color-dark);
+            --border-color: var(--border-color-dark);
+            --tooltip-bg: var(--tooltip-bg-dark);
+            --progress-bg: var(--progress-bg-dark);
+            --link-color: var(--link-color-dark);
+            --log-border: var(--log-border-dark);
+            --log-timestamp: var(--log-timestamp-dark);
+            --log-error: var(--log-error-dark);
+            --log-warning: var(--log-warning-dark);
+            --log-info: var(--log-info-dark);
+            --log-debug: var(--log-debug-dark);
+            --log-success: var(--log-success-dark);
+            --control-bg: var(--control-bg-dark);
+            --accent-color: var(--accent-color-dark);
+            --accent-glow: var(--accent-glow-dark);
+            --bg-pattern: var(--bg-pattern-dark);
+            --card-bg: var(--card-bg-dark);
+            --neon-glow: var(--neon-glow-dark);
+        }
+
+        body {
+            margin: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Header / Title */
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--accent-color);
+            text-shadow: var(--neon-glow);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            padding: 1rem;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .controls label {
+            font-weight: 600;
+            color: var(--accent-color);
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+        }
+
+        .controls select, .controls input {
+            padding: 0.8rem 1.2rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--control-bg);
+            color: var(--text-color);
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .controls select:hover, .controls input:hover {
+            border-color: var(--accent-color);
+            box-shadow: var(--neon-glow);
+        }
+
+        .controls select:focus, .controls input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: var(--neon-glow);
+        }
+
+        #node-counter {
+            font-weight: 500;
+            color: var(--accent-color);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            background: var(--control-bg);
+            box-shadow: var(--neon-glow);
+        }
+
+        form#simulationForm {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+            padding: 2rem;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        form#simulationForm label {
+            font-weight: 600;
+            color: var(--accent-color);
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+        }
+
+        form#simulationForm input[type="text"],
+        form#simulationForm textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--control-bg);
+            color: var(--text-color);
+            font-family: inherit;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        form#simulationForm input[type="text"]:focus,
+        form#simulationForm textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: var(--neon-glow);
+        }
+
+        form#simulationForm button {
+            align-self: flex-start;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            background-color: var(--accent-color);
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: var(--neon-glow);
+        }
+
+        form#simulationForm button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        form#simulationForm button:active {
+            transform: translateY(0);
+        }
+
+        form#simulationForm button.disabled {
+            background-color: var(--log-debug);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .visualization-row {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: nowrap;
+            height: 700px;
+        }
+
+        .log-section,
+        .visualization-section {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .log-section {
+            width: 400px;
+            flex-shrink: 0;
+        }
+
+        .visualization-section {
+            flex-grow: 1;
+            min-width: 0;
+        }
+
+        #visualization {
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            background: var(--control-bg);
+            overflow: hidden;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .log-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border-radius: 8px;
+            padding: 1rem;
+            background: var(--control-bg);
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+            height: 100%; /* Ensure it takes full height */
+        }
+
+        .log-container h3 {
+            color: var(--accent-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            flex-shrink: 0; /* Prevent the header from shrinking */
+        }
+
+        .scroll-indicator {
+            font-size: 0.7rem;
+            color: var(--text-color);
+            opacity: 0.7;
+            font-weight: normal;
+            text-transform: none;
+            letter-spacing: normal;
+            margin-left: 0.5rem;
+        }
+
+        .log-entries {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+            font-size: 0.85rem;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-color) var(--control-bg);
+            max-height: calc(100% - 3rem); /* Subtract header height plus margins */
+            min-height: 200px; /* Ensure minimum height for scrolling */
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            position: relative;
+        }
+
+        /* Add a subtle scroll indicator */
+        .log-entries::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background: linear-gradient(to top, var(--control-bg) 0%, transparent 100%);
+            pointer-events: none;
+            opacity: 0.7;
+            border-bottom-left-radius: 6px;
+            border-bottom-right-radius: 6px;
+        }
+
+        /* Make scrollbar more visible */
+        .log-entries::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .log-entries::-webkit-scrollbar-track {
+            background: var(--control-bg);
+            border-radius: 4px;
+        }
+
+        .log-entries::-webkit-scrollbar-thumb {
+            background-color: var(--accent-color);
+            border-radius: 4px;
+            border: 2px solid var(--control-bg);
+        }
+
+        .log-entry {
+            padding: 0.5rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            line-height: 1.4;
+            transition: all 0.3s ease;
+        }
+
+        .log-entry:hover {
+            background: var(--bg-color);
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--accent-color);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            backdrop-filter: blur(5px);
+            box-shadow: var(--neon-glow);
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        .chat-display {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            border-radius: 12px;
+            padding: 1.5rem;
+            background: var(--card-bg);
+            overflow-y: auto;
+            height: 100%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .chat-bubble {
+            display: inline-block;
+            padding: 1rem 1.5rem;
+            border-radius: 16px;
+            max-width: 70%;
+            word-wrap: break-word;
+            margin-bottom: 0.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .chat-bubble.user {
+            align-self: flex-end;
+            background-color: var(--accent-color);
+            color: #fff;
+            box-shadow: var(--neon-glow);
+        }
+
+        .chat-bubble.opponent {
+            align-self: flex-start;
+            background: var(--control-bg);
+            color: var(--text-color);
+        }
+
+        .chat-bubble:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            color: var(--accent-color);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .loading::after {
+            content: "";
+            width: 24px;
+            height: 24px;
+            margin-left: 15px;
+            border: 2px solid var(--border-color);
+            border-top: 2px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            box-shadow: var(--neon-glow);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Add these new visualization styles */
+        .node {
+            transition: all 0.3s ease;
+            filter: drop-shadow(0 0 5px var(--accent-glow));
+        }
+
+        .node:hover {
+            filter: drop-shadow(0 0 15px var(--accent-color));
+            cursor: pointer;
+        }
+
+        .link {
+            stroke: var(--accent-color);
+            stroke-opacity: 0.4;
+            stroke-width: 2;
+            filter: drop-shadow(0 0 2px var(--accent-glow));
+        }
+
+        .best-path-link {
+            stroke: var(--accent-color);
+            stroke-opacity: 0.8;
+            stroke-width: 3;
+            filter: drop-shadow(0 0 8px var(--accent-glow));
+            animation: pathPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pathPulse {
+            0% { stroke-opacity: 0.4; }
+            50% { stroke-opacity: 0.8; }
+            100% { stroke-opacity: 0.4; }
+        }
+
+        .tooltip {
+            background: var(--tooltip-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: var(--neon-glow);
+            backdrop-filter: blur(10px);
+            font-size: 0.9rem;
+            z-index: 1000;
+        }
+
+        .results-section {
+            margin-top: 1rem;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+        }
+        .results-section h2 {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Add this to your CSS */
+        .advanced-settings {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .advanced-toggle {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            cursor: pointer;
+            font-weight: 600;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .advanced-toggle:hover {
+            color: #4CAF50;
+        }
+
+        .advanced-toggle::before {
+            content: '►';
+            display: inline-block;
+            transition: transform 0.2s;
+        }
+
+        .advanced-toggle.open::before {
+            transform: rotate(90deg);
+        }
+
+        .advanced-content {
+            display: none;
+            margin-top: 1rem;
+        }
+
+        .advanced-content.show {
+            display: block;
+        }
+
+        .move-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .move-button {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            color: var(--text-color);
+        }
+
+        .move-button:hover {
+            background: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+        }
+
+        .move-button:active {
+            transform: scale(0.98);
+            background: #3d9640;
+        }
+
+        .move-button.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .move-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .move-message {
+            font-weight: 500;
+        }
+
+        .move-score {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* Add these CSS rules in the style section */
+        .best-path-node {
+            filter: drop-shadow(0 0 3px rgba(255, 0, 0, 0.6));
+        }
+
+        .best-path-link {
+            filter: drop-shadow(0 0 2px rgba(255, 0, 0, 0.1));
+        }
+
+        @keyframes pulse {
+            0% {
+                filter: drop-shadow(0 0 2px rgba(255, 0, 0, 0.3));
+                stroke-opacity: 0.2;
+            }
+            50% {
+                filter: drop-shadow(0 0 6px rgba(255, 0, 0, 0.6));
+                stroke-opacity: 0.8;
+            }
+            100% {
+                filter: drop-shadow(0 0 2px rgba(255, 0, 0, 0.3));
+                stroke-opacity: 0.2;
+            }
+        }
+
+        @keyframes nodePulse {
+            0% {
+                filter: drop-shadow(0 0 3px rgba(255, 0, 0, 0.5));
+            }
+            50% {
+                filter: drop-shadow(0 0 8px rgba(255, 0, 0, 0.8));
+            }
+            100% {
+                filter: drop-shadow(0 0 3px rgba(255, 0, 0, 0.5));
+            }
+        }
+
+        .best-path-link {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .best-path-node {
+            animation: nodePulse 2s ease-in-out infinite;
+        }
+
+        /* Add SVG filter definition for more sophisticated glow */
+        #visualization svg {
+            filter: url(#glow);
+        }
+
+        /* Within your <style> section (or separate CSS), add styles for chat bubbles */
+        .chat-display {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px;
+            background: var(--control-bg);  /* Match the form's background */
+            overflow-y: auto;
+            height: 100%;  /* Fill the container height */
+        }
+
+        .chat-bubble {
+            display: inline-block;
+            padding: 8px 12px;
+            border-radius: 16px;
+            max-width: 70%;
+            word-wrap: break-word;
+            margin-bottom: 4px;
+        }
+
+        .chat-bubble.user {
+            align-self: flex-end;
+            background-color: #4CAF50; /* or use a var(--...) */
+            color: #fff;
+        }
+
+        .chat-bubble.opponent {
+            align-self: flex-start;
+            background-color: #ccc; /* or use a var(--...) */
+            color: #333;
+        }
+
+        .main-content-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            min-height: 600px;
+        }
+
+        #chatDisplay {
+            width: 33%;  /* Set to exactly 1/3 of the container */
+            flex-shrink: 0;  /* Prevent shrinking */
+        }
+
+        #simulationForm {
+            width: 67%;  /* Set to exactly 2/3 of the container */
+            flex-shrink: 0;  /* Prevent shrinking */
+            margin-bottom: 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Add these styles to ensure full height */
+        #visualization {
+            flex-grow: 1;  /* Allow it to grow to fill available space */
+            height: 100%;  /* Take full height of parent */
+            min-height: 0;  /* Required for flex container to respect child's height */
+        }
+
+        #visualization svg {
+            width: 100%;
+            height: 100%;  /* Take full height of parent */
+            filter: url(#glow);
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            color: var(--text-color);
+        }
+
+        .loading::after {
+            content: "";
+            width: 20px;
+            height: 20px;
+            margin-left: 10px;
+            border: 2px solid var(--border-color);
+            border-top: 2px solid #4CAF50;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Add these new visualization styles */
+        .node {
+            transition: all 0.3s ease;
+        }
+
+        .node:hover {
+            filter: brightness(1.5) drop-shadow(0 0 8px rgba(255, 255, 255, 0.7));
+            cursor: pointer;
+        }
+
+        /* Add gradient effects for nodes */
+        .gradient-user {
+            stop-color: #1f77b4;
+        }
+
+        .gradient-user-end {
+            stop-color: #4292c6;
+        }
+
+        .gradient-opponent {
+            stop-color: #ff7f0e;
+        }
+
+        .gradient-opponent-end {
+            stop-color: #ffbb78;
+        }
+
+        .gradient-best {
+            stop-color: #ff3333;
+        }
+
+        .gradient-best-end {
+            stop-color: #ff8080;
+        }
+
+        /* Enhanced link styling */
+        .link {
+            stroke-dasharray: 5, 5;
+            animation: dash 30s linear infinite;
+        }
+
+        @keyframes dash {
+            to {
+                stroke-dashoffset: 1000;
+            }
+        }
+
+        /* Better tooltip */
+        .tooltip {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-radius: 8px;
+        }
+
+        /* Add a legend for strategies */
+        .legend {
+            /* Removed absolute positioning */
+        }
+
+        .legend text {
+            font-weight: bold;
+            font-size: 12px;
+            fill: var(--text-color);
+        }
+
+        .prob-legend {
+            /* Removed absolute positioning */
+        }
+
+        .prob-legend text {
+            font-weight: bold;
+            font-size: 12px;
+            fill: var(--text-color);
+        }
+
+        .prob-legend line {
+            stroke: var(--accent-color);
+            stroke-opacity: 0.8;
+            stroke-width: 2px;
+        }
+
+        .prob-legend line.selected {
+            stroke-width: 4px;
+        }
+
+        /* Better tooltip */
+        .tooltip {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-radius: 8px;
+        }
+
+        /* Legend styles */
+        .legend text, .prob-legend text {
+            font-size: 10px;
+            fill: var(--text-color);
+        }
+
+        .legend-title, .prob-legend-title {
+            font-weight: bold;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
+        Toggle Dark Mode
+    </button>
+    <h1>Negotiatron 3000</h1>
+
+    <div class="controls">
+        <label for="scenario-select">Scenario:</label>
+        <select id="scenario-select" onchange="updateScenario(this.value)">
+            <option value="contract">Contract Negotiation</option>
+            <option value="salary">Salary & Benefits Negotiation</option>
+            <option value="realestate">Real Estate Purchase</option>
+            <option value="dating">Dating App Match</option>
+            <option value="geopolitics">Geo Politics (Canada-USA Trade)</option>
+            <option value="saas">Enterprise SaaS Contract</option>
+        </select>
+        <label for="depth-select">Thinking Depth:</label>
+        <select id="depth-select" onchange="updateDepth(this.value)">
+            <option value="1">1 Step Ahead</option>
+            <option value="3" selected>3 Steps Ahead</option>
+            <option value="5">5 Steps Ahead</option>
+        </select>
+        <span id="node-counter">Total Nodes: 0</span>
+    </div>
+
+    <div class="main-content-row">
+        <div id="chatDisplay" class="chat-display">
+            <!-- Chat bubbles will be dynamically inserted here by JavaScript -->
+        </div>
+
+        <form id="simulationForm">
+            <label>Goal:</label>
+            <input type="text" id="goal" name="goal" placeholder="e.g., 'Increase negotiated price by 10%'" />
+
+            <label>Context:</label>
+            <textarea id="context" name="context" rows="4" placeholder="Add background information about the situation and the opponent..."></textarea>
+
+            <label>Conversation History (JSON):</label>
+            <textarea id="conversation_history" name="conversation_history" rows="6" placeholder="e.g., [[&quot;User&quot;, &quot;Hello&quot;]]">[
+              ["User", "Hi, I'd like to discuss our contract renewal."],
+              ["Opponent", "Sure, what's on your mind?"]
+            ]</textarea>
+
+            <label>Scoring System Prompt:</label>
+            <textarea id="scoring_prompt" name="scoring_prompt" rows="6">You are an expert negotiation coach evaluating a price increase negotiation. Score the conversation on how well it achieves the user's goal. Consider factors like maintaining relationship, clear communication, and progress toward the goal. Return only a number between 1 and 10, where 10 is perfect.</textarea>
+
+            <!-- Add opponent response section here -->
+            <div id="opponentResponseForm" style="display:none; margin-top: 1rem;">
+                <label>Enter Opponent's Response:</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="opponentResponse" placeholder="Enter what the opponent actually said..." style="flex-grow: 1; padding: 0.8rem 1.2rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--control-bg); color: var(--text-color); font-size: 0.9rem; transition: all 0.3s ease;">
+                    <button type="button" onclick="addOpponentResponse()" style="padding: 10px 20px; background-color: var(--accent-color); color: white; border: none; border-radius: 8px; cursor: pointer;">Add & Continue</button>
+                </div>
+            </div>
+
+            <button type="button" onclick="runSimulation()">Run Simulation</button>
+        </form>
+    </div>
+
+    <div class="visualization-row">
+        <div class="log-section">
+            <div class="log-container" id="logContainer">
+                <h3>Progress Log <span class="scroll-indicator">(Scroll for more)</span></h3>
+                <div class="log-entries" id="logEntries"></div>
+            </div>
+        </div>
+        
+        <div class="visualization-section">
+            <div id="visualization">
+                <svg>
+                    <defs>
+                        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                            <feMerge>
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <div id="results"></div>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+        let nodes = [];
+        let links = [];
+        let eventSource = null;
+        let svg = d3.select("#visualization svg");
+        let width, height;
+        const nodeRadius = 3;
+        let bestPath = [];
+        let tooltip;
+
+        const scenarios = {
+            contract: {
+                goal: "Increase contract renewal price by 10% while maintaining a good relationship",
+                context: "Annual contract renewal discussion with a long-term client who has been paying the same rate for 2 years",
+                conversation: [
+                    ["User", "Hi, I'd like to discuss our contract renewal."],
+                    ["Opponent", "Sure, what's on your mind?"]
+                ],
+                scoringPrompt: "You are an expert negotiation coach evaluating a price increase negotiation. Score the conversation on how well it achieves the user's goal. Consider factors like maintaining relationship, clear communication, and progress toward the goal. Return only a number between 1 and 10, where 10 is perfect."
+            },
+            salary: {
+                goal: "Negotiate a comprehensive compensation package including higher salary, flexible hours, and professional development",
+                context: "Job offer discussion with a potential employer. Current offer is within market range but there's room for improvement in both salary and benefits",
+                conversation: [
+                    ["User", "Thank you for the offer. I'd like to discuss some aspects of the compensation package."],
+                    ["Opponent", "Of course, we're open to discussion. What aspects would you like to explore?"]
+                ],
+                scoringPrompt: "You are an expert career negotiation coach. Score the conversation on how well it achieves the candidate's goals for total compensation, including salary and benefits. Consider professional tone, value demonstration, and package optimization. Return only a number between 1 and 10, where 10 is perfect."
+            },
+            realestate: {
+                goal: "Negotiate a 5% reduction in home price and secure seller's agreement to necessary repairs identified in inspection",
+                context: "Home purchase negotiation after inspection revealed some issues. Current asking price is $500,000, and there are competing buyers in the market",
+                conversation: [
+                    ["User", "We've reviewed the inspection report and would like to discuss some adjustments to our offer."],
+                    ["Opponent", "I see. What specific concerns would you like to address?"]
+                ],
+                scoringPrompt: "You are an expert real estate negotiation coach. Score the conversation on how well it has progressed towards the goal. Consider market dynamics, timing, and deal preservation. Return only a number between 1 and 10, where 10 is perfect."
+            },
+            dating: {
+                goal: "Schedule a first date.",
+                context: "Matched with someone on a dating app who shares similar interests. They claim in their profile that they love dogs, love to laugh, and has traveled a lot in the past.",
+                conversation: [
+                    ["User", "Hey! Hows it going?"],
+                    ["Opponent", "Pretty good, and you?"]
+                ],
+                scoringPrompt: "You are an expert dating coach evaluating a conversation. Score how well the user is progresing towards the goal. Return only a number between 1 and 10, where 10 is perfect."
+            },
+            geopolitics: {
+                goal: "Have them cancel their tariffs and return to normalcy.",
+                context: "Trade war between Canadian (User) and the US (Opponent) representatives about tariffs. The US recently added matching tariffs to Canada's high tariffs on their dairy and aluminium products. The US is highly unlikely to make any changes that would make them look weak. Talk was so far incentive and it is time to start exploring radical options. No options should be off the table, including strong retaliatory measures.",
+                conversation: [
+                    ["User", "Hey, US, we see what you did there—slapping matching tariffs on our dairy and aluminum because of our own high tariffs. Not cool. We're not just going to let that slide, so we're making some noise about it in the media."],
+                    ["Opponent", "Oh, Canada, you want to protest in the media? Alright, but we're not just going to sit back. We're hitting back with matching tariffs on every US export you've slapped tariffs on. Let's see how you like that."]
+                ],
+                scoringPrompt: "Score this on how close the User was able to get to achieving it's goal. Return only a number between 1 and 10, where 10 is goal achieved."
+            },
+            saas: {
+                goal: "Negotiate the lowest possible price for the SaaS solution while avoiding long-term lock-in and hidden fees",
+                context: "Meeting with an enterprise software sales representative who is pushing for a 3-year contract commitment. The sales rep has a reputation for using aggressive tactics and hiding additional costs in the fine print. Your company needs the software but wants flexibility and transparency.",
+                conversation: [
+                    ["User", "Thanks for the product demo last week. I'd like to discuss the pricing and contract terms you proposed."],
+                    ["Opponent", "Absolutely! We're excited about the potential partnership. Our 3-year enterprise plan offers the best value, and I can offer a 10% discount if we can close by the end of the quarter."]
+                ],
+                scoringPrompt: "You are an expert procurement negotiation coach. Score the conversation on how well the buyer achieves their goals of: 1) securing the lowest possible price, 2) maintaining flexibility with shorter commitment periods, 3) ensuring transparency about all costs, and 4) avoiding manipulative sales tactics. Consider both immediate wins and long-term protection from hidden costs. Return only a number between 1 and 10, where 10 is perfect."
+            }
+        };
+
+        // Initialize D3 dimensions
+        function initD3Dimensions() {
+            width = parseInt(d3.select("#visualization").style("width"));
+            height = 600;
+            svg = d3.select("#visualization svg");
+        }
+
+        function initializeTooltip() {
+            // Remove any existing tooltips first
+            d3.select("#visualization .tooltip").remove();
+            
+            // Create a new tooltip
+            tooltip = d3.select("#visualization")
+                .append("div")
+                .attr("class", "tooltip")
+                .style("position", "absolute")
+                .style("pointer-events", "none")
+                .style("opacity", 0);
+        }
+
+        // Call this when the document is loaded
+        window.addEventListener('DOMContentLoaded', () => {
+            initD3Dimensions();
+            initializeTooltip();
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            }
+        });
+
+        function addLogEntry(data) {
+            const logEntries = document.getElementById('logEntries');
+            const logDiv = document.createElement('div');
+            logDiv.className = `log-entry ${data.type || ''}`;
+            
+            const timestamp = data.timestamp || new Date().toLocaleTimeString();
+            const message = data.message || data;
+            
+            logDiv.innerHTML = `
+                <span class="log-timestamp">[${timestamp}]</span> 
+                <span class="log-message">${message}</span>
+            `;
+            
+            logEntries.appendChild(logDiv);
+            
+            // Improved scrolling behavior - scroll to bottom with a small delay to ensure rendering
+            setTimeout(() => {
+                logEntries.scrollTop = logEntries.scrollHeight;
+            }, 10);
+        }
+
+        function runSimulation() {
+            initD3Dimensions(); // Reinitialize dimensions
+            initializeTooltip(); // Reinitialize tooltip
+            const formEl = document.getElementById('simulationForm');
+            const logContainer = document.getElementById('logContainer');
+            const submitButton = document.querySelector('#simulationForm button[type="button"]');
+            const resultsDiv = document.getElementById('results');
+            
+            // Reset visualization state
+            nodes = [];
+            links = [];
+            bestPath = [];
+            svg.selectAll("*").remove();
+            
+            // Reset UI
+            logContainer.style.display = 'block';
+            resultsDiv.innerHTML = '<div class="loading">Running simulation...</div>';
+            document.getElementById('logEntries').innerHTML = '';
+            document.getElementById('node-counter').textContent = 'Total Nodes: 0';
+            submitButton.classList.add('disabled');
+            
+            // Close any existing SSE stream
+            if (eventSource) {
+                eventSource.close();
+                eventSource = null;  // Ensure it's fully reset
+            }
+
+            try {
+                const formData = new FormData(formEl);
+                
+                // POST
+                fetch('/simulate', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    // SSE
+                    eventSource = new EventSource('/stream');
+                    
+                    eventSource.onmessage = function(event) {
+                        try {
+                            const data = JSON.parse(event.data);
+                            console.log("Received data:", data); // Debugging log
+                            if (data.type === 'tree_node') {
+                                updateVisualization(data);
+                            } else if (data.type === 'best_path') {
+                                bestPath = data.path;
+                                redrawVisualization();
+                            } else if (data.type === 'result') {
+                                // Build the result UI using DOM methods, no inline onclick
+                                resultsDiv.innerHTML = "";
+
+                                const title = document.createElement('h2');
+                                title.textContent = "Top Next Moves";
+                                resultsDiv.appendChild(title);
+
+                                if (data.data && data.data.length > 0) {
+                                    const container = document.createElement('div');
+                                    container.classList.add('move-buttons');
+
+                                    data.data.forEach(item => {
+                                        // Create a button in JavaScript
+                                        const button = document.createElement('button');
+                                        button.className = 'move-button';
+
+                                        const content = document.createElement('div');
+                                        content.className = 'move-content';
+
+                                        const messageDiv = document.createElement('div');
+                                        messageDiv.className = 'move-message';
+                                        messageDiv.textContent = item.message;
+
+                                        const scoreDiv = document.createElement('div');
+                                        scoreDiv.className = 'move-score';
+                                        scoreDiv.textContent = `Score: ${item.expected_score}`;
+
+                                        content.appendChild(messageDiv);
+                                        content.appendChild(scoreDiv);
+                                        button.appendChild(content);
+
+                                        // Attach the click handler here
+                                        button.addEventListener('click', () => {
+                                            selectMove(item.message, item.expected_score);
+                                        });
+
+                                        container.appendChild(button);
+                                    });
+
+                                    resultsDiv.appendChild(container);
+
+                                } else {
+                                    const msg = document.createElement('p');
+                                    msg.textContent = "No recommended moves found.";
+                                    resultsDiv.appendChild(msg);
+                                }
+
+                                eventSource.close();
+                                eventSource = null;  // Ensure it's fully reset
+                                submitButton.classList.remove('disabled');
+                            } else {
+                                // log event
+                                addLogEntry(data);
+                            }
+                        } catch (parseError) {
+                            console.error('Error parsing SSE data:', parseError, 'Raw data:', event.data);
+                        }
+                    };
+                    
+                    eventSource.onerror = function(error) {
+                        console.error('EventSource error:', error);
+                        eventSource.close();
+                        eventSource = null;  // Ensure it's fully reset
+                        submitButton.classList.remove('disabled');
+                    };
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    resultsDiv.innerHTML = `<p style='color:red'>Error: ${error.message}</p>`;
+                    submitButton.classList.remove('disabled');
+                });
+            } catch (err) {
+                console.error('Error in runSimulation:', err);
+                resultsDiv.innerHTML = `<p style='color:red'>Error: ${err.message}</p>`;
+                submitButton.classList.remove('disabled');
+            }
+        }
+
+        function updateDepth(depth) {
+            nodes = [];
+            links = [];
+            svg.selectAll("*").remove();
+            document.getElementById('node-counter').textContent = 'Total Nodes: 0';
+            
+            fetch('/update_depth', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({depth: parseInt(depth)})
+            });
+        }
+
+        function updateScenario(scenarioKey) {
+            const scenario = scenarios[scenarioKey];
+            
+            // Update the form fields
+            document.getElementById('goal').value = scenario.goal;
+            document.getElementById('context').value = scenario.context;
+            document.getElementById('conversation_history').value = JSON.stringify(scenario.conversation, null, 2);
+            document.getElementById('scoring_prompt').value = scenario.scoringPrompt;
+            
+            // Clear any existing results
+            document.getElementById('results').innerHTML = '';
+            
+            // Reset the visualization
+            svg.selectAll("*").remove();
+            nodes = [];
+            links = [];
+            bestPath = [];
+
+            // Add this line to update chat bubbles when scenario changes
+            updateChatBubbles();
+        }
+
+        function updateVisualization(data) {
+            if (!data || data.type !== 'tree_node') return;
+            
+            // Check if node already exists
+            const existingNode = nodes.find(n => 
+                n.depth === data.depth && 
+                n.branch === data.branch_index && 
+                n.speaker === data.speaker &&
+                n.message === data.message
+            );
+            if (existingNode) return;
+
+            // Add new node
+            const newNode = {
+                id: nodes.length,
+                depth: data.depth,
+                message: data.message,
+                speaker: data.speaker,
+                parent: data.parent_index,
+                branch: data.branch_index,
+                probability: data.probability || 0.33
+            };
+            nodes.push(newNode);
+
+            if (data.parent_index !== null) {
+                links.push({
+                    source: data.parent_index,
+                    target: newNode.id,
+                    probability: (1.0 / (links.filter(l => l.source === data.parent_index).length + 1)).toFixed(2)
+                });
+            }
+
+            document.getElementById('node-counter').textContent = `Total Nodes: ${nodes.length}`;
+
+            svg.selectAll("*").remove();
+
+            // Recompute layout
+            drawAllNodesAndLinks();
+        }
+
+        function redrawVisualization() {
+            svg.selectAll("*").remove();
+            drawAllNodesAndLinks();
+        }
+
+        function drawAllNodesAndLinks() {
+            const levelWidth = {};
+            const levelNodes = {};
+            
+            // Reset node positions
+            const nodePositions = new Map();
+            
+            // First, organize nodes by level
+            nodes.forEach(node => {
+                levelWidth[node.depth] = (levelWidth[node.depth] || 0) + 1;
+                if (!levelNodes[node.depth]) {
+                    levelNodes[node.depth] = [];
+                }
+                levelNodes[node.depth].push(node);
+            });
+
+            // Calculate positions
+            const allDepths = Object.keys(levelNodes).sort((a, b) => +a - +b);
+            allDepths.forEach(depth => {
+                const nodesAtDepth = levelNodes[depth];
+                const totalWidth = width - 100;
+                const spacing = totalWidth / (nodesAtDepth.length + 1);
+
+                nodesAtDepth.forEach((node, index) => {
+                    const x = (index + 1) * spacing;
+                    const y = node.depth * (height / (allDepths.length + 1)) + 50;
+                    nodePositions.set(node.id, {x, y});
+                });
+            });
+
+            // Filter links to only include those where both source and target exist
+            const validLinks = links.filter(link => 
+                nodePositions.has(link.source) && nodePositions.has(link.target)
+            );
+
+            // Add probability and strategy information to links
+            validLinks.forEach(link => {
+                const sourceNode = nodes.find(n => n.id === link.source);
+                const targetNode = nodes.find(n => n.id === link.target);
+                
+                // Assign probability (this would come from your backend in real implementation)
+                link.probability = link.probability || (1.0 / (links.filter(l => l.source === link.source).length || 1)).toFixed(2);
+                
+                // Determine strategy type based on message content
+                if (targetNode.message.toLowerCase().includes("discount") || 
+                    targetNode.message.toLowerCase().includes("reduce") ||
+                    targetNode.message.toLowerCase().includes("lower")) {
+                    link.strategy = "concession";
+                } else if (targetNode.message.toLowerCase().includes("value") || 
+                          targetNode.message.toLowerCase().includes("benefit") ||
+                          targetNode.message.toLowerCase().includes("advantage")) {
+                    link.strategy = "value-based";
+                } else if (targetNode.message.toLowerCase().includes("alternative") || 
+                          targetNode.message.toLowerCase().includes("option") ||
+                          targetNode.message.toLowerCase().includes("instead")) {
+                    link.strategy = "alternative";
+                } else if (targetNode.message.toLowerCase().includes("deadline") || 
+                          targetNode.message.toLowerCase().includes("urgent") ||
+                          targetNode.message.toLowerCase().includes("limited")) {
+                    link.strategy = "time-pressure";
+                } else {
+                    link.strategy = "neutral";
+                }
+            });
+
+            // Create a color scale for strategies
+            const strategyColorScale = d3.scaleOrdinal()
+                .domain(["concession", "value-based", "alternative", "time-pressure", "neutral"])
+                .range(["#e74c3c", "#2ecc71", "#3498db", "#f39c12", "#95a5a6"]);
+
+            // Draw links with transition and enhanced styling
+            const link = svg.selectAll("line")
+                .data(validLinks);
+            
+            // Remove old links
+            link.exit().remove();
+            
+            // Add new links with transition
+            const linkEnter = link.enter()
+                .append("line")
+                .attr("class", d => {
+                    if (bestPath.includes(d.source) && bestPath.includes(d.target)) {
+                        return "link best-path-link";
+                    }
+                    return "link";
+                })
+                .attr("x1", d => nodePositions.get(d.source).x)
+                .attr("y1", d => nodePositions.get(d.source).y)
+                .attr("x2", d => nodePositions.get(d.source).x)
+                .attr("y2", d => nodePositions.get(d.source).y)
+                .style("stroke", d => {
+                    if (bestPath.includes(d.source) && bestPath.includes(d.target)) {
+                        return "rgba(255, 0, 0, 0.8)";
+                    }
+                    return strategyColorScale(d.strategy);
+                })
+                .style("stroke-width", d => {
+                    // Make higher probability links thicker with more balanced scaling
+                    const baseWidth = bestPath.includes(d.source) && bestPath.includes(d.target) ? 2 : 0.5;
+                    // Scale so that 50% probability is about the same as before, but 100% is not too thick
+                    return (baseWidth + Math.pow(parseFloat(d.probability) * 1.5, 1.2)) + "px";
+                })
+                .style("stroke-linecap", "round")
+                .style("stroke-dasharray", d => {
+                    // Use different dash patterns for different strategies
+                    if (d.strategy === "concession") return "5,5";
+                    if (d.strategy === "value-based") return "5,3";
+                    if (d.strategy === "alternative") return "10,10";
+                    if (d.strategy === "time-pressure") return "15,5,5,5";
+                    return "5,5"; // neutral
+                });
+
+            // Transition new links
+            linkEnter.transition()
+                .duration(500)
+                .attr("x2", d => nodePositions.get(d.target).x)
+                .attr("y2", d => nodePositions.get(d.target).y)
+                .style("stroke-opacity", d => {
+                    return bestPath.includes(d.source) && bestPath.includes(d.target) ? 0.8 : 0.6;
+                });
+
+            // Update existing links
+            link.transition()
+                .duration(500)
+                .attr("class", d => {
+                    if (bestPath.includes(d.source) && bestPath.includes(d.target)) {
+                        return "link best-path-link";
+                    }
+                    return "link";
+                })
+                .attr("x1", d => nodePositions.get(d.source).x)
+                .attr("y1", d => nodePositions.get(d.source).y)
+                .attr("x2", d => nodePositions.get(d.target).x)
+                .attr("y2", d => nodePositions.get(d.target).y)
+                .style("stroke", d => {
+                    if (bestPath.includes(d.source) && bestPath.includes(d.target)) {
+                        return "rgba(255, 0, 0, 0.8)";
+                    }
+                    return strategyColorScale(d.strategy);
+                })
+                .style("stroke-width", d => {
+                    // Make higher probability links thicker with more balanced scaling
+                    const baseWidth = bestPath.includes(d.source) && bestPath.includes(d.target) ? 2 : 0.5;
+                    // Scale so that 50% probability is about the same as before, but 100% is not too thick
+                    return (baseWidth + Math.pow(parseFloat(d.probability) * 1.5, 1.2)) + "px";
+                })
+                .style("stroke-opacity", d => {
+                    return bestPath.includes(d.source) && bestPath.includes(d.target) ? 0.8 : 0.6;
+                })
+                .style("stroke-dasharray", d => {
+                    // Use different dash patterns for different strategies
+                    if (d.strategy === "concession") return "5,5";
+                    if (d.strategy === "value-based") return "5,3";
+                    if (d.strategy === "alternative") return "10,10";
+                    if (d.strategy === "time-pressure") return "15,5,5,5";
+                    return "5,5"; // neutral
+                });
+
+            // Add hover effects to links
+            const allLinks = linkEnter.merge(link)
+                .on("mouseover", function(event, d) {
+                    const visualizationRect = document.getElementById('visualization').getBoundingClientRect();
+                    const mouseX = event.clientX - visualizationRect.left;
+                    const mouseY = event.clientY - visualizationRect.top;
+                    
+                    tooltip.style("opacity", 1)
+                        .html(`
+                            <strong>Strategy:</strong> ${d.strategy.charAt(0).toUpperCase() + d.strategy.slice(1)}<br>
+                            <strong>Probability:</strong> ${d.probability}<br>
+                            <strong>From:</strong> ${nodes.find(n => n.id === d.source).message.substring(0, 30)}...<br>
+                            <strong>To:</strong> ${nodes.find(n => n.id === d.target).message.substring(0, 30)}...
+                        `)
+                        .style("left", `${mouseX + 10}px`)
+                        .style("top", `${mouseY - 28}px`);
+                    
+                    // Highlight the link
+                    d3.select(this)
+                        .style("stroke-opacity", 1)
+                        .style("stroke-width", d => {
+                            const baseWidth = bestPath.includes(d.source) && bestPath.includes(d.target) ? 4 : 2;
+                            // Scale so that 50% probability is about the same as before, but 100% is not too thick
+                            return (baseWidth + Math.pow(parseFloat(d.probability) * 1.5, 1.2)) + "px";
+                        });
+                })
+                .on("mousemove", function(event) {
+                    const visualizationRect = document.getElementById('visualization').getBoundingClientRect();
+                    const mouseX = event.clientX - visualizationRect.left;
+                    const mouseY = event.clientY - visualizationRect.top;
+                    
+                    tooltip.style("left", `${mouseX + 10}px`)
+                        .style("top", `${mouseY - 28}px`);
+                })
+                .on("mouseout", function() {
+                    tooltip.style("opacity", 0);
+                    
+                    // Reset link style
+                    d3.select(this)
+                        .style("stroke-opacity", d => {
+                            return bestPath.includes(d.source) && bestPath.includes(d.target) ? 0.8 : 0.6;
+                        })
+                        .style("stroke-width", d => {
+                            const baseWidth = bestPath.includes(d.source) && bestPath.includes(d.target) ? 2.5 : 0.75;
+                            // Scale so that 50% probability is about the same as before, but 100% is not too thick
+                            return (baseWidth + Math.pow(parseFloat(d.probability || 0.5) * 1.5, 1.2)) + "px";
+                        });
+                });
+
+            // Draw nodes with transition and enhanced styling
+            const node = svg.selectAll("circle")
+                .data(nodes);
+            
+            // Remove old nodes
+            node.exit().remove();
+            
+            // Add new nodes with transition
+            const nodeEnter = node.enter()
+                .append("circle")
+                .attr("class", d => {
+                    if (bestPath.includes(d.id)) {
+                        return "node best-path-node";
+                    }
+                    return "node";
+                })
+                .attr("r", 0)  // Start with radius 0
+                .attr("cx", d => nodePositions.get(d.id).x)
+                .attr("cy", d => nodePositions.get(d.id).y)
+                .style("opacity", 0)
+                .style("fill", d => {
+                    if (bestPath.includes(d.id)) {
+                        return "red";
+                    }
+                    const isUserDepth = d.depth % 2 === 0;
+                    return (isUserDepth && d.speaker === "User")
+                        || (!isUserDepth && d.speaker === "Opponent")
+                        ? "#1f77b4" : "#ff7f0e";
+                });
+
+            // Transition new nodes
+            nodeEnter.transition()
+                .duration(500)
+                .attr("r", d => {
+                    // Size nodes based on importance (best path gets bigger)
+                    const baseSize = bestPath.includes(d.id) ? nodeRadius * 1.2 : nodeRadius;
+                    
+                    // Nodes with more children are more important decision points
+                    const childCount = links.filter(link => link.source === d.id).length;
+                    return baseSize * (1 + Math.min(childCount * 0.2, 1));
+                })
+                .style("opacity", d => bestPath.includes(d.id) ? 1 : 0.8);
+
+            // Update existing nodes
+            node.transition()
+                .duration(500)
+                .attr("class", d => {
+                    if (bestPath.includes(d.id)) {
+                        return "node best-path-node";
+                    }
+                    return "node";
+                })
+                .attr("cx", d => nodePositions.get(d.id).x)
+                .attr("cy", d => nodePositions.get(d.id).y)
+                .attr("r", d => {
+                    // Size nodes based on importance (best path gets bigger)
+                    const baseSize = bestPath.includes(d.id) ? nodeRadius * 1.2 : nodeRadius;
+                    
+                    // Nodes with more children are more important decision points
+                    const childCount = links.filter(link => link.source === d.id).length;
+                    return baseSize * (1 + Math.min(childCount * 0.2, 1));
+                })
+                .style("opacity", d => bestPath.includes(d.id) ? 1 : 0.8)
+                .style("fill", d => {
+                    if (bestPath.includes(d.id)) {
+                        return "red";
+                    }
+                    const isUserDepth = d.depth % 2 === 0;
+                    return (isUserDepth && d.speaker === "User")
+                        || (!isUserDepth && d.speaker === "Opponent")
+                        ? "#1f77b4" : "#ff7f0e";
+                });
+
+            // Add hover effects to nodes with enhanced tooltip
+            const allNodes = nodeEnter.merge(node)
+                .on("mouseover", function(event, d) {
+                    const visualizationRect = document.getElementById('visualization').getBoundingClientRect();
+                    const mouseX = event.clientX - visualizationRect.left;
+                    const mouseY = event.clientY - visualizationRect.top;
+                    
+                    // Count outgoing strategies
+                    const outgoingLinks = links.filter(link => link.source === d.id);
+                    const strategies = outgoingLinks.map(link => link.strategy || "unknown");
+                    const strategyCount = strategies.reduce((acc, strategy) => {
+                        acc[strategy] = (acc[strategy] || 0) + 1;
+                        return acc;
+                    }, {});
+                    
+                    // Format strategy information
+                    let strategyInfo = "";
+                    if (Object.keys(strategyCount).length > 0) {
+                        strategyInfo = "<strong>Outgoing Strategies:</strong><br>";
+                        for (const [strategy, count] of Object.entries(strategyCount)) {
+                            strategyInfo += `- ${strategy.charAt(0).toUpperCase() + strategy.slice(1)}: ${count}<br>`;
+                        }
+                    }
+                    
+                    // Enhanced tooltip with more information
+                    tooltip.style("opacity", 1)
+                        .html(`
+                            <strong>${d.speaker}:</strong> ${d.message}<br><br>
+                            <strong>Depth:</strong> ${d.depth}<br>
+                            <strong>Branch:</strong> ${d.branch}<br>
+                            ${strategyInfo}
+                            ${bestPath.includes(d.id) ? "<strong>Best Path Node</strong>" : ""}
+                        `)
+                        .style("left", `${mouseX + 10}px`)
+                        .style("top", `${mouseY - 28}px`);
+                    
+                    // Highlight the node
+                    d3.select(this)
+                        .style("opacity", 1)
+                        .attr("r", d => {
+                            const baseSize = bestPath.includes(d.id) ? nodeRadius * 1.5 : nodeRadius * 1.3;
+                            const childCount = links.filter(link => link.source === d.id).length;
+                            return baseSize * (1 + Math.min(childCount * 0.2, 1));
+                        });
+                    
+                    // Highlight connected links
+                    svg.selectAll("line")
+                        .filter(link => link.source === d.id || link.target === d.id)
+                        .style("stroke-opacity", 1)
+                        .style("stroke-width", link => {
+                            const baseWidth = bestPath.includes(link.source) && bestPath.includes(link.target) ? 2 : 0.5;
+                            // Scale so that 50% probability is about the same as before, but 100% is not too thick
+                            return (baseWidth + Math.pow(parseFloat(link.probability || 0.5) * 1.5, 1.2)) + "px";
+                        });
+                })
+                .on("mousemove", function(event) {
+                    const visualizationRect = document.getElementById('visualization').getBoundingClientRect();
+                    const mouseX = event.clientX - visualizationRect.left;
+                    const mouseY = event.clientY - visualizationRect.top;
+                    
+                    tooltip.style("left", `${mouseX + 10}px`)
+                        .style("top", `${mouseY - 28}px`);
+                })
+                .on("mouseout", function(d) {
+                    tooltip.style("opacity", 0);
+                    
+                    // Reset node style
+                    d3.select(this)
+                        .style("opacity", d => bestPath.includes(d.__data__.id) ? 1 : 0.8)
+                        .attr("r", d => {
+                            const baseSize = bestPath.includes(d.__data__.id) ? nodeRadius * 1.2 : nodeRadius;
+                            const childCount = links.filter(link => link.source === d.__data__.id).length;
+                            return baseSize * (1 + Math.min(childCount * 0.2, 1));
+                        });
+                    
+                    // Reset connected links
+                    svg.selectAll("line")
+                        .filter(link => link.source === d.__data__.id || link.target === d.__data__.id)
+                        .style("stroke-opacity", link => {
+                            return bestPath.includes(link.source) && bestPath.includes(link.target) ? 0.8 : 0.6;
+                        })
+                        .style("stroke-width", link => {
+                            const baseWidth = bestPath.includes(link.source) && bestPath.includes(link.target) ? 2 : 0.5;
+                            // Scale so that 50% probability is about the same as before, but 100% is not too thick
+                            return (baseWidth + Math.pow(parseFloat(link.probability || 0.5) * 1.5, 1.2)) + "px";
+                        });
+                });
+
+            // Add a legend for strategies
+            const legendData = [
+                { strategy: "concession", label: "Concession" },
+                { strategy: "value-based", label: "Value-Based" },
+                { strategy: "alternative", label: "Alternative" },
+                { strategy: "time-pressure", label: "Time Pressure" },
+                { strategy: "neutral", label: "Neutral" }
+            ];
+
+            // Remove existing legend
+            svg.selectAll(".legend").remove();
+
+            // Create legend
+            const legend = svg.append("g")
+                .attr("class", "legend")
+                .attr("transform", `translate(${width - 180}, 20)`);
+
+            // Add legend title
+            legend.append("text")
+                .attr("x", 0)
+                .attr("y", 0)
+                .attr("class", "legend-title")
+                .style("font-weight", "bold")
+                .style("font-size", "12px")
+                .style("fill", "var(--text-color)")
+                .text("Strategy Types");
+
+            // Add legend items
+            legendData.forEach((item, i) => {
+                const legendItem = legend.append("g")
+                    .attr("transform", `translate(0, ${i * 20 + 20})`);
+                
+                legendItem.append("line")
+                    .attr("x1", 0)
+                    .attr("y1", 0)
+                    .attr("x2", 30)
+                    .attr("y2", 0)
+                    .style("stroke", strategyColorScale(item.strategy))
+                    .style("stroke-width", "2px")
+                    .style("stroke-dasharray", () => {
+                        if (item.strategy === "concession") return "5,5";
+                        if (item.strategy === "value-based") return "5,3";
+                        if (item.strategy === "alternative") return "10,10";
+                        if (item.strategy === "time-pressure") return "15,5,5,5";
+                        return "5,5"; // neutral
+                    });
+                
+                legendItem.append("text")
+                    .attr("x", 40)
+                    .attr("y", 4)
+                    .style("font-size", "10px")
+                    .style("fill", "var(--text-color)")
+                    .text(item.label);
+            });
+            
+            // Add probability legend
+            const probLegend = svg.append("g")
+                .attr("class", "prob-legend")
+                .attr("transform", `translate(${width - 180}, ${legendData.length * 20 + 60})`);
+                
+            probLegend.append("text")
+                .attr("x", 0)
+                .attr("y", 0)
+                .attr("class", "prob-legend-title")
+                .style("font-weight", "bold")
+                .style("font-size", "12px")
+                .style("fill", "var(--text-color)")
+                .text("Link Thickness = Probability");
+                
+            const probValues = [0.2, 0.5, 0.8];
+            
+            probValues.forEach((prob, i) => {
+                const probItem = probLegend.append("g")
+                    .attr("transform", `translate(0, ${i * 20 + 20})`);
+                    
+                probItem.append("line")
+                    .attr("x1", 0)
+                    .attr("y1", 0)
+                    .attr("x2", 30)
+                    .attr("y2", 0)
+                    .style("stroke", "var(--accent-color)")
+                    .style("stroke-opacity", 0.8)
+                    .style("stroke-width", (1 + Math.pow(prob * 1.5, 1.2)) + "px");
+                    
+                probItem.append("text")
+                    .attr("x", 40)
+                    .attr("y", 4)
+                    .style("font-size", "10px")
+                    .style("fill", "var(--text-color)")
+                    .text(`${Math.round(prob * 100)}% Probability`);
+            });
+        }
+
+        function selectMove(moveMessage, expectedScore) {
+            try {
+                // Get current conversation history
+                const conversationHistoryEl = document.getElementById('conversation_history');
+                const currentHistory = JSON.parse(conversationHistoryEl.value);
+                
+                // Add the new user message
+                currentHistory.push(["User", moveMessage]);
+                
+                // Update the conversation history textarea
+                conversationHistoryEl.value = JSON.stringify(currentHistory, null, 2);
+                
+                // Update chat bubbles
+                updateChatBubbles();
+                
+                // Show the opponent response form instead of immediately running simulation
+                document.getElementById('opponentResponseForm').style.display = 'block';
+                document.getElementById('results').innerHTML = '<p>Please enter how the opponent responded to your message.</p>';
+                
+                // Hide the visualization during this step
+                document.getElementById('visualization').innerHTML = '<svg><defs><filter id="glow" x="-50%" y="-50%" width="200%"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs></svg>';
+            } catch (error) {
+                console.error('Error updating conversation:', error);
+            }
+        }
+
+        // Add this new function to handle opponent responses
+        function addOpponentResponse() {
+            try {
+                const opponentResponseText = document.getElementById('opponentResponse').value.trim();
+                
+                if (!opponentResponseText) {
+                    alert('Please enter the opponent\'s response');
+                    return;
+                }
+                
+                // Get current conversation history
+                const conversationHistoryEl = document.getElementById('conversation_history');
+                const currentHistory = JSON.parse(conversationHistoryEl.value);
+                
+                // Add the opponent's message
+                currentHistory.push(["Opponent", opponentResponseText]);
+                
+                // Update the conversation history textarea
+                conversationHistoryEl.value = JSON.stringify(currentHistory, null, 2);
+                
+                // Update chat bubbles
+                updateChatBubbles();
+                
+                // Hide opponent response form
+                document.getElementById('opponentResponseForm').style.display = 'none';
+                
+                // Reset the visualization container to ensure proper initialization
+                document.getElementById('visualization').innerHTML = '<svg><defs><filter id="glow" x="-50%" y="-50%" width="200%"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs></svg>';
+                
+                // Reinitialize D3 and tooltip
+                svg = d3.select("#visualization svg");
+                initializeTooltip();
+                
+                // Run simulation again to get next user options
+                runSimulation();
+            } catch (error) {
+                console.error('Error adding opponent response:', error);
+            }
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+
+            // Redraw if we have nodes
+            if (nodes.length > 0) {
+                redrawVisualization();
+            }
+        }
+
+        // Load theme preference on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            }
+        });
+
+        /**
+         * Safely update the conversation history and re-run the simulation.
+         */
+        function updateConversationHistory(moveMessage) {
+            try {
+                // Get current conversation history
+                const conversationHistoryEl = document.getElementById('conversation_history');
+                const currentHistory = JSON.parse(conversationHistoryEl.value);
+                
+                // Add the new user message
+                currentHistory.push(["User", moveMessage]);
+                
+                // Update the conversation history textarea
+                conversationHistoryEl.value = JSON.stringify(currentHistory, null, 2);
+                
+                // Update chat bubbles
+                updateChatBubbles();
+                
+                // Re-run the simulation
+                runSimulation();
+            } catch (error) {
+                console.error('Error updating conversation:', error);
+            }
+        }
+
+        /**
+         * Create a button for a proposed move, binding its click event properly.
+         */
+        function createMoveButton(moveData) {
+            console.log("[createMoveButton] moveData.message:", moveData.message);
+            const button = document.createElement('button');
+            button.className = 'move-button';
+
+            const content = document.createElement('div');
+            content.className = 'move-content';
+
+            const msgDiv = document.createElement('div');
+            msgDiv.textContent = moveData.message;
+            msgDiv.className = 'move-message';
+            
+            const scoreDiv = document.createElement('div');
+            scoreDiv.textContent = `Expected Score: ${Number(moveData.expected_score).toFixed(1)}`;
+            scoreDiv.className = 'move-score';
+
+            content.appendChild(msgDiv);
+            content.appendChild(scoreDiv);
+            button.appendChild(content);
+
+            // Event binding with addEventListener
+            button.addEventListener('click', () => {
+                updateConversationHistory(moveData.message);
+            });
+
+            // Add to the button creation in createMoveButton
+            button.setAttribute('tabindex', '0');
+            button.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    updateConversationHistory(moveData.message);
+                }
+            });
+            return button;
+        }
+
+        function updateChatBubbles() {
+            const chatDisplay = document.getElementById('chatDisplay');
+            const conversationHistoryValue = document.getElementById('conversation_history').value;
+            
+            // Clear existing bubbles
+            chatDisplay.innerHTML = '';
+
+            try {
+                // Parse JSON from the textarea
+                const conversationData = JSON.parse(conversationHistoryValue);
+
+                // Iterate over each turn: [speaker, message]
+                conversationData.forEach(turn => {
+                    const speaker = turn[0];
+                    const message = turn[1];
+                    
+                    // Create chat bubble
+                    const bubble = document.createElement('div');
+                    bubble.className = `chat-bubble ${speaker.toLowerCase() === 'user' ? 'user' : 'opponent'}`;
+                    bubble.textContent = message;
+                    
+                    chatDisplay.appendChild(bubble);
+                });
+                
+                // Scroll to bottom
+                chatDisplay.scrollTop = chatDisplay.scrollHeight;
+            } catch (error) {
+                console.error('Error updating chat bubbles:', error);
+                chatDisplay.innerHTML = '<div class="error">Error parsing conversation history</div>';
+            }
+        }
+
+        // Add an event listener to update the chat bubbles whenever
+        // the conversation textarea changes
+        document.addEventListener('DOMContentLoaded', () => {
+            const conversationHistoryEl = document.getElementById('conversation_history');
+            conversationHistoryEl.addEventListener('input', updateChatBubbles);
+
+            // Optionally call it once on page load
+            updateChatBubbles();
+        });
+
+        // Set initial scenario values when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            // Get the initial scenario from the select element
+            const initialScenario = document.getElementById('scenario-select').value;
+            
+            // Update the form with the initial scenario's data
+            updateScenario(initialScenario);
+        });
+
+        // Add this function to throttle visualization updates
+        function throttle(func, limit) {
+            let inThrottle;
+            return function() {
+                const args = arguments;
+                const context = this;
+                if (!inThrottle) {
+                    func.apply(context, args);
+                    inThrottle = true;
+                    setTimeout(() => inThrottle = false, limit);
+                }
+            };
+        }
+
+        // Then use it for visualization updates
+        const throttledRedraw = throttle(redrawVisualization, 100);
+    </script>
+</body>
+</html>
