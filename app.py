@@ -95,13 +95,14 @@ class ConversationNode:
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 def log_event(message, event_type="info"):
-    """Generate a log event"""
+    """Generate a Server-Sent Event log entry."""
     timestamp = datetime.now().strftime("%H:%M:%S")
-    return f"data: {json.dumps({
-        'type': event_type,
-        'timestamp': timestamp,
-        'message': message
-    })}\n\n"
+    payload = {
+        "type": event_type,
+        "timestamp": timestamp,
+        "message": message,
+    }
+    return f"data: {json.dumps(payload)}\n\n"
 
 def call_persona_model(persona_model, conversation_history, speaker, goal, context):
     """
@@ -273,14 +274,15 @@ def build_conversation_tree(current_node, depth, goal):
     # If we're at depth 0, just emit a single node for the entire prior conversation.
     if depth == 0 and current_node.conversation:
         last_speaker, last_message = current_node.conversation[-1]
-        yield f"data: {json.dumps({
-            'type': 'tree_node',
-            'message': last_message,
-            'speaker': last_speaker,
-            'depth': 0,
-            'branch_index': 0,
-            'parent_index': None
-        })}\n\n"
+        payload = {
+            "type": "tree_node",
+            "message": last_message,
+            "speaker": last_speaker,
+            "depth": 0,
+            "branch_index": 0,
+            "parent_index": None,
+        }
+        yield f"data: {json.dumps(payload)}\n\n"
     
     current_len = len(current_node.conversation)
     if current_len % 2 == 0:
@@ -357,20 +359,22 @@ def build_conversation_tree(current_node, depth, goal):
     
     yield log_event(f"=== EXITING build_conversation_tree at depth {depth} ===", "debug")
 
-def score_conversation_tree(node, goal):
-    """
-    Recursively score all nodes in the tree.
-    Returns the score for the current node.
-    """
+def score_conversation_tree(node, goal, context="", scoring_prompt=None):
+    """Recursively score all nodes in the tree."""
     # If it's a leaf node or has no children, score the conversation directly
     if not node.children:
-        node.score = call_scoring_model(node.conversation, goal, f"Current conversation: {node.conversation}")
+        node.score = call_scoring_model(
+            node.conversation,
+            goal,
+            context,
+            scoring_prompt,
+        )
         return node.score
     
     # Otherwise, score children first
     child_scores = []
     for child in node.children:
-        child_score = score_conversation_tree(child, goal)
+        child_score = score_conversation_tree(child, goal, context, scoring_prompt)
         # For opponent turns, use probability-weighted scores
         if len(node.conversation) % 2 == 1:  # Opponent's turn
             child_scores.append(child_score * child.probability)
@@ -391,7 +395,7 @@ def score_conversation_tree(node, goal):
 # TOP-LEVEL LOGIC TO FIND BEST USER MOVES
 # ------------------------------------------------------------------------------
 
-def find_best_user_moves(goal, conversation_history):
+def find_best_user_moves(goal, conversation_history, context="", scoring_prompt=None):
     """
     Build conversation tree and find the best moves for the user.
     """
@@ -407,14 +411,15 @@ def find_best_user_moves(goal, conversation_history):
     
     # First, send the root node's conversation as initial nodes
     for i, (speaker, message) in enumerate(conversation_history):
-        yield f"data: {json.dumps({
-            'type': 'tree_node',
-            'message': message,
-            'speaker': speaker,
-            'depth': i,
-            'branch_index': 0,
-            'parent_index': i-1 if i > 0 else None
-        })}\n\n"
+        payload = {
+            "type": "tree_node",
+            "message": message,
+            "speaker": speaker,
+            "depth": i,
+            "branch_index": 0,
+            "parent_index": i - 1 if i > 0 else None,
+        }
+        yield f"data: {json.dumps(payload)}\n\n"
     
     # Build the tree and collect all possible future conversations
     tree_generator = build_conversation_tree(root, 0, goal)
@@ -426,7 +431,7 @@ def find_best_user_moves(goal, conversation_history):
     
     # Score the entire tree from bottom up
     yield log_event("Starting to score all paths...", "info")
-    score_conversation_tree(root, goal)
+    score_conversation_tree(root, goal, context, scoring_prompt)
     
     # Find best immediate moves (direct children of root)
     if root.children:
@@ -534,11 +539,17 @@ def stream():
         yield log_event('Tree built, calculating scores...', 'info')
         
         # Then score the tree
-        score_conversation_tree(root, goal)
+        score_conversation_tree(
+            root,
+            goal,
+            CURRENT_SIMULATION.get('context', ''),
+            CURRENT_SIMULATION.get('scoring_prompt'),
+        )
         
         # Send highest-scoring path
         best_path = find_best_path(root)
-        yield f"data: {json.dumps({'type': 'best_path', 'path': best_path})}\n\n"
+        payload = {"type": "best_path", "path": best_path}
+        yield f"data: {json.dumps(payload)}\n\n"
         
         yield log_event('Finding best moves...', 'info')
         
@@ -554,13 +565,18 @@ def stream():
             moves_with_scores.sort(key=lambda x: x[1], reverse=True)
         
         # Send completion progress
-        yield f"data: {json.dumps({'type': 'progress', 'value': 100})}\n\n"
+        payload = {"type": "progress", "value": 100}
+        yield f"data: {json.dumps(payload)}\n\n"
         
         # Send results
-        yield f"data: {json.dumps({
-            'type': 'result',
-            'data': [{'message': msg, 'expected_score': score} for msg, score in moves_with_scores[:3]]
-        })}\n\n"
+        payload = {
+            "type": "result",
+            "data": [
+                {"message": msg, "expected_score": score}
+                for msg, score in moves_with_scores[:3]
+            ],
+        }
+        yield f"data: {json.dumps(payload)}\n\n"
         
         yield log_event('Analysis complete!', 'complete')
         
